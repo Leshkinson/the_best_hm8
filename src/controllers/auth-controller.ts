@@ -2,9 +2,6 @@ import {Request, Response} from "express";
 import {HTTP_STATUSES} from "../http_statuses";
 import {jwtService} from "../application/jwt-service";
 import {authService} from "../services/auth-service";
-import {userModels} from "../models/user-models";
-import {UserResponseFromDBType} from "../types/types";
-
 
 export const authController = {
 
@@ -21,8 +18,35 @@ export const authController = {
     },
 
     async authorization(req: Request, res: Response) {
-        const token = await jwtService.createJWT(req.content.user)
-        res.status(HTTP_STATUSES.OK200).send(token)
+        const accessToken = await jwtService.createAccessToken(req.content.user)
+        const refreshToken = await jwtService.createRefreshToken(req.content.user)
+        res.status(HTTP_STATUSES.OK200).cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: false
+        }).send(accessToken)
+    },
+
+
+    async refreshToken(req: Request, res: Response) {
+        const {refreshToken} = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+        }
+
+        const userId = await jwtService.decodeReFreshToken(refreshToken)
+        const isTokenUsed = await authService.findUsedToken(refreshToken)
+        if (userId && isTokenUsed) {
+            const user = {id: userId}
+            const accessToken = await jwtService.createAccessToken(user)
+            const refreshNewToken = await jwtService.createRefreshToken(user)
+            console.log('refreshNewToken', refreshNewToken)
+            await authService.saveUsedToken(req.cookies.refreshToken)
+            return res.status(HTTP_STATUSES.OK200).cookie('refreshToken', refreshNewToken, {
+                httpOnly: true,
+                secure: false
+            }).send(accessToken)
+        }
+        return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
     },
 
     async registration(req: Request, res: Response) {
@@ -40,5 +64,11 @@ export const authController = {
         isEmailSend ? res.sendStatus(HTTP_STATUSES.NO_CONTENT_204) : res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
     },
 
-
+    async logout(req: Request, res: Response) {
+        const {refreshToken} = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+        }
+        return res.clearCookie('refreshToken').sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+    },
 }

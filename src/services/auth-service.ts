@@ -6,6 +6,7 @@ import add from 'date-fns/add'
 import {emailManager} from "../application/emailManager";
 import {userRepository} from "../repositories/user-repositpry";
 import {getTextForRegistration} from "../utils/getTextForRegistration";
+import {usedRefreshRepository} from "../repositories/usedRefresh-repository";
 
 export const authService = {
 
@@ -14,7 +15,6 @@ export const authService = {
         console.log('test for render', userData)
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(userData.password, salt)
-        console.log('test for render',salt, hash)
         const generatedCode = uuidv4()
         const newUser: UserFromDBType = {
             id,
@@ -74,4 +74,14 @@ export const authService = {
         }
         return false
     },
+
+    async saveUsedToken(token: any): Promise<void> {
+        await usedRefreshRepository.saveUsedToken(token)
+    },
+
+    async findUsedToken(refreshToken: any): Promise<boolean> {
+        const filter = {refreshToken}
+        const isTokenUsed = await usedRefreshRepository.findUsedToken(filter)
+        return !!isTokenUsed
+    }
 }

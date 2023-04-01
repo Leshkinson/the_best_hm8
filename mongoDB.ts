@@ -11,6 +11,7 @@ export const postCollections = myDB.collection<PostResponseType>("posts")
 export const blogCollections = myDB.collection<BlogResponseType>("blogs")
 export const userCollections = myDB.collection<UserFromDBType>("users")
 export const commentCollections = myDB.collection<any>("comments")
+export const usedRefreshCollections = myDB.collection<any>("usedRefresh")
 export async function runDB() {
     try {
         await client.connect()

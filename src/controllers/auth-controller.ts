@@ -39,7 +39,7 @@ export const authController = {
             const user = {id: userId}
             const accessToken = await jwtService.createAccessToken(user)
             const refreshNewToken = await jwtService.createRefreshToken(user)
-            //await authService.saveUsedToken(req.cookies.refreshToken)
+            await authService.saveUsedToken(req.cookies.refreshToken)
             return res.status(HTTP_STATUSES.OK200).cookie('refreshToken', refreshNewToken, {
                 httpOnly: true,
                 secure: true

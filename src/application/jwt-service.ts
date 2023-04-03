@@ -6,12 +6,12 @@ const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || '333'
 export const jwtService = {
 
     async createAccessToken(user: any){
-        const accessToken  = jwt.sign({userId: user.id}, accessTokenSecret, {expiresIn: '1d'}) // Вернуть время обратно!!!
+        const accessToken  = jwt.sign({userId: user.id}, accessTokenSecret, {expiresIn: '10s'}) // Вернуть время обратно!!!
         return {accessToken}
     },
 
     async createRefreshToken(user: any){
-        const refreshToken = jwt.sign({userId: user.id}, refreshTokenSecret, { expiresIn: '1d' });
+        const refreshToken = jwt.sign({userId: user.id}, refreshTokenSecret, { expiresIn: '20s' });
         return {refreshToken}
     },
 

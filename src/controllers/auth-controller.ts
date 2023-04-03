@@ -22,7 +22,7 @@ export const authController = {
         const refreshToken = await jwtService.createRefreshToken(req.content.user)
         res.status(HTTP_STATUSES.OK200).cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: false
+            secure: true
         }).send(accessToken)
     },
 
@@ -39,11 +39,10 @@ export const authController = {
             const user = {id: userId}
             const accessToken = await jwtService.createAccessToken(user)
             const refreshNewToken = await jwtService.createRefreshToken(user)
-            console.log('refreshNewToken', refreshNewToken)
             await authService.saveUsedToken(req.cookies.refreshToken)
             return res.status(HTTP_STATUSES.OK200).cookie('refreshToken', refreshNewToken, {
                 httpOnly: true,
-                secure: false
+                secure: true
             }).send(accessToken)
         }
         return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);

@@ -35,7 +35,7 @@ export const authController = {
 
         const userId = await jwtService.decodeReFreshToken(refreshToken)
         const isTokenUsed = await authService.findUsedToken(refreshToken)
-        if (userId && isTokenUsed) {
+        if (userId && !isTokenUsed) {
             const user = {id: userId}
             const accessToken = await jwtService.createAccessToken(user)
             const refreshNewToken = await jwtService.createRefreshToken(user)

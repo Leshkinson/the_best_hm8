@@ -65,7 +65,8 @@ export const authController = {
 
     async logout(req: Request, res: Response) {
         const {refreshToken} = req.cookies.refreshToken;
-        if (!refreshToken) {
+        const userId = await jwtService.decodeReFreshToken(refreshToken)
+        if (!refreshToken || !userId) {
             return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
         }
         return res.clearCookie('refreshToken').sendStatus(HTTP_STATUSES.NO_CONTENT_204)

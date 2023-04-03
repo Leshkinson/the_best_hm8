@@ -15,7 +15,7 @@ export const authRouter = Router({})
 //-------------------GET---------------//
 authRouter.get('/me', authMiddleware, authController.getMe)
 //-------------------POST---------------//
-authRouter.post('/refresh-token', authController.refreshToken)
+authRouter.post('/refresh-token', checkIsRefreshTokenValid, authController.refreshToken)
 authRouter.post('/login', authValidation, checkIsValidUser, inputValidationMiddleware, authController.authorization)
 authRouter.post('/registration', registrationValidate,  inputValidationMiddleware, authController.registration)
 authRouter.post('/registration-confirmation', checkCodeValidation, inputValidationMiddleware, authController.registrationConfirmation)

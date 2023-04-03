@@ -92,11 +92,12 @@ export const authService = {
     async refreshToken(userId: any, oldRefreshToken: string){
         const user = {id: userId}
         await authService.saveUsedToken(oldRefreshToken)
-        return await this.createdAccessAndRefreshTokens(user)
+        return await authService.createdAccessAndRefreshTokens(user)
     },
 
     async saveUsedToken(token: any): Promise<void> {
-        await usedRefreshRepository.saveUsedToken(token)
+        const tokenObj = {refreshToken: token}
+        await usedRefreshRepository.saveUsedToken(tokenObj)
     },
 
     async findUsedToken(refreshToken: any): Promise<boolean> {

@@ -57,7 +57,7 @@ export const authController = {
             return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
         }
 
-        await authService.saveUsedToken(req.cookies.refreshToken)
+        await authService.saveUsedToken(refreshToken)
         return res.clearCookie('refreshToken').sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     },
 }

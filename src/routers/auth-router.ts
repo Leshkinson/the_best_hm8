@@ -8,6 +8,7 @@ import {
     regEmailResendValidation, registrationValidate
 } from "../validators/auth-validation";
 import {authMiddleware} from "../middleware/authMiddleware";
+import {checkIsRefreshTokenValid} from "../middleware/checkIsRefreshTokenValid";
 
 export const authRouter = Router({})
 
@@ -19,5 +20,5 @@ authRouter.post('/login', authValidation, checkIsValidUser, inputValidationMiddl
 authRouter.post('/registration', registrationValidate,  inputValidationMiddleware, authController.registration)
 authRouter.post('/registration-confirmation', checkCodeValidation, inputValidationMiddleware, authController.registrationConfirmation)
 authRouter.post('/registration-email-resending', regEmailResendValidation, inputValidationMiddleware, authController.regEmailResend)
-authRouter.post('/logout', authController.logout)
+authRouter.post('/logout', checkIsRefreshTokenValid, authController.logout)
 

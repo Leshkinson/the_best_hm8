@@ -64,12 +64,13 @@ export const authController = {
     },
 
     async logout(req: Request, res: Response) {
-        const {refreshToken} = req.cookies.refreshToken;
-        const isTokenUsed = await authService.findUsedToken(refreshToken)
+         const {refreshToken} = req.cookies.refreshToken;
+
         const userId = await jwtService.decodeReFreshToken(refreshToken)
-        if (!refreshToken || isTokenUsed || !userId) {
+        if (!userId) {
             return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
         }
+
         await authService.saveUsedToken(req.cookies.refreshToken)
         return res.clearCookie('refreshToken').sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     },

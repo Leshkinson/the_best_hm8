@@ -1,4 +1,4 @@
-import {CommentResponseType, UserFromDBType, UserRequestType} from "../types/types";
+import {UserFromDBType, UserRequestType} from "../types/types";
 import {createId} from "../utils/createId";
 import bcrypt from "bcrypt";
 import {v4 as uuidv4} from 'uuid';
@@ -7,12 +7,26 @@ import {emailManager} from "../application/emailManager";
 import {userRepository} from "../repositories/user-repositpry";
 import {getTextForRegistration} from "../utils/getTextForRegistration";
 import {usedRefreshRepository} from "../repositories/usedRefresh-repository";
+import {jwtService} from "../application/jwt-service";
 
 export const authService = {
 
+    async getMe(user:any){
+        return {
+            "email": user.accountData.email,
+            "login": user.accountData.userName,
+            "userId": user.id,
+        }
+    },
+
+    async createdAccessAndRefreshTokens(user: any){
+        const accessToken = await jwtService.createAccessToken(user)
+        const refreshToken = await jwtService.createRefreshToken(user)
+        return [accessToken, refreshToken]
+    },
+
     async registration(userData: UserRequestType) {
         const id = createId()
-        console.log('test for render', userData)
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(userData.password, salt)
         const generatedCode = uuidv4()
@@ -73,6 +87,12 @@ export const authService = {
             return true
         }
         return false
+    },
+
+    async refreshToken(userId: any, oldRefreshToken: string){
+        const user = {id: userId}
+        await authService.saveUsedToken(oldRefreshToken)
+        return await this.createdAccessAndRefreshTokens(user)
     },
 
     async saveUsedToken(token: any): Promise<void> {

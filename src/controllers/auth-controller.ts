@@ -6,20 +6,14 @@ import {authService} from "../services/auth-service";
 export const authController = {
 
     async getMe(req: Request, res: Response) {
-        let user = {}
         if (req.content.user) {
-            user = {
-                "email": req.content.user.accountData.email,
-                "login": req.content.user.accountData.userName,
-                "userId": req.content.user.id,
-            }
+          const user =  await  authService.getMe(req.content.user)
             res.status(HTTP_STATUSES.OK200).send(user)
         }
     },
 
     async authorization(req: Request, res: Response) {
-        const accessToken = await jwtService.createAccessToken(req.content.user)
-        const refreshToken = await jwtService.createRefreshToken(req.content.user)
+        const [accessToken, refreshToken] =  await authService.createdAccessAndRefreshTokens(req.content.user)
         res.status(HTTP_STATUSES.OK200).cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: true
@@ -29,17 +23,9 @@ export const authController = {
 
     async refreshToken(req: Request, res: Response) {
         const {refreshToken} = req.cookies.refreshToken;
-        if (!refreshToken) {
-            return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
-        }
-
         const userId = await jwtService.decodeReFreshToken(refreshToken)
-        const isTokenUsed = await authService.findUsedToken(refreshToken)
-        if (userId && !isTokenUsed) {
-            const user = {id: userId}
-            const accessToken = await jwtService.createAccessToken(user)
-            const refreshNewToken = await jwtService.createRefreshToken(user)
-            await authService.saveUsedToken(req.cookies.refreshToken)
+        if (userId) {
+            const [accessToken, refreshNewToken] = await authService.refreshToken(userId, refreshToken)
             return res.status(HTTP_STATUSES.OK200).cookie('refreshToken', refreshNewToken, {
                 httpOnly: true,
                 secure: true

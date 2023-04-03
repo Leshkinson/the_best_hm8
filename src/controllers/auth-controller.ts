@@ -39,7 +39,7 @@ export const authController = {
             const user = {id: userId}
             const accessToken = await jwtService.createAccessToken(user)
             const refreshNewToken = await jwtService.createRefreshToken(user)
-            await authService.saveUsedToken(req.cookies.refreshToken)
+            //await authService.saveUsedToken(req.cookies.refreshToken)
             return res.status(HTTP_STATUSES.OK200).cookie('refreshToken', refreshNewToken, {
                 httpOnly: true,
                 secure: true
@@ -65,10 +65,11 @@ export const authController = {
 
     async logout(req: Request, res: Response) {
         const {refreshToken} = req.cookies.refreshToken;
-        const userId = await jwtService.decodeReFreshToken(refreshToken)
-        if (!refreshToken || !userId) {
+        const isTokenUsed = await authService.findUsedToken(refreshToken)
+        if (!refreshToken || isTokenUsed) {
             return res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
         }
+        await authService.saveUsedToken(req.cookies.refreshToken)
         return res.clearCookie('refreshToken').sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     },
 }
